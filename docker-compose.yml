@@ -11,6 +11,8 @@ services:
       - POSTGRES_DB=bsf
       - POSTGRES_USER=bsf
       - POSTGRES_PASSWORD=bsf
+    volumes:
+      - .:/app
     depends_on:
       - db
   db:

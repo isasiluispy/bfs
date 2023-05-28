@@ -1,0 +1,51 @@
+{% extends 'location_app/base.html' %} {% block title %}Locations{% endblock %}
+{% block content %}
+<h1>Locations</h1>
+<!-- Add the specific content for the home page here -->
+
+<div id="map" style="height: 400px"></div>
+<div id="comments"></div>
+{% endblock %} {% block extrajs %}
+<script>
+  function initMap() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          console.log(position.coords.latitude, position.coords.longitude)
+          const map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: position.coords.latitude, lng: position.coords.longitude },
+            zoom: 14,
+          });
+
+          // Iterate over the locations and add markers to the map
+          let marker;
+          {% for location in locations %}
+              marker = new google.maps.Marker({
+                  position: { lat: {{ location.latitude }}, lng: {{ location.longitude }} },
+                  map,
+                  title: "{{ location.name }}"
+              });
+
+              // Add a click event listener to show comments
+              marker.addListener("click", function() {
+                  const commentsDiv = document.getElementById("comments");
+                  commentsDiv.innerHTML = "<h3>Comments for {{ location.name }}</h3>";
+
+                  // Iterate over the comments and add them below the map
+                  {% for comment in location.comments.all %}
+                      commentsDiv.innerHTML += "<p>{{ comment.text }}</p>";
+                  {% endfor %}
+              });
+          {% endfor %}
+        });
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
+  }
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key={{google_maps_api_key}}&callback=initMap"
+  async
+  defer
+></script>
+{% endblock %}
